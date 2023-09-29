@@ -35,11 +35,13 @@ ARG skip_ds_deps
 ARG skip_dev_deps
 # Controls whether to install all dependencies for testing.
 ARG test_all_deps
+# Controls whether to build the backend app
+ARG skip_backend_build
 
 RUN useradd --create-home redash
 
 # Ubuntu packages
-RUN apt-get update && \
+RUN if [ "x$skip_backend_build" = "x" ] ; then apt-get update && \
   apt-get install -y --no-install-recommends \
   curl \
   gnupg \
@@ -62,12 +64,13 @@ RUN apt-get update && \
   unzip \
   libsasl2-modules-gssapi-mit && \
   apt-get clean && \
-  rm -rf /var/lib/apt/lists/*
+  rm -rf /var/lib/apt/lists/* \
+  ; fi
 
 
 ARG TARGETPLATFORM
 ARG databricks_odbc_driver_url=https://databricks-bi-artifacts.s3.us-east-2.amazonaws.com/simbaspark-drivers/odbc/2.6.26/SimbaSparkODBC-2.6.26.1045-Debian-64bit.zip
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+RUN if [ "x$skip_backend_build" = "x" -a "$TARGETPLATFORM" = "linux/amd64" ]; then \
   curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
   && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \
   && apt-get update \
@@ -88,7 +91,7 @@ WORKDIR /app
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV PIP_NO_CACHE_DIR=1
 
-RUN pip install pip==23.1.2;
+RUN if [ "x$skip_backend_build" = "x" ] ; then pip install pip==23.1.2; fi
 
 # We first copy only the requirements file, to avoid rebuilding on every file change.
 COPY requirements_all_ds.txt ./
@@ -99,7 +102,7 @@ COPY requirements_dev.txt ./
 RUN if [ "x$skip_dev_deps" = "x" ] ; then pip install -r requirements_dev.txt ; fi
 
 COPY requirements.txt ./
-RUN pip install -r requirements.txt
+RUN if [ "x$skip_backend_build" = "x" ] ; then pip install -r requirements.txt; fi
 
 RUN if [ "x$test_all_deps" != "x" ] ; then pip3 install -r requirements.txt -r requirements_dev.txt -r requirements_all_ds.txt ; fi
 
