@@ -183,6 +183,9 @@ def login(org_slug=None):
     elif current_org == None:  # noqa: E711
         return redirect("/")
 
+    login_redirect_url = current_org.get_setting("login_redirect_url")
+    if current_org.get_setting("login_redirect_url"):
+        return redirect(login_redirect_url)
     index_url = url_for("redash.index", org_slug=org_slug)
     unsafe_next_path = request.args.get("next", index_url)
     next_path = get_next_path(unsafe_next_path)

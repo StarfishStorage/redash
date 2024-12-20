@@ -43,6 +43,7 @@ SEND_EMAIL_ON_FAILED_SCHEDULED_QUERIES = parse_boolean(
 )
 HIDE_PLOTLY_MODE_BAR = parse_boolean(os.environ.get("HIDE_PLOTLY_MODE_BAR", "false"))
 DISABLE_PUBLIC_URLS = parse_boolean(os.environ.get("REDASH_DISABLE_PUBLIC_URLS", "false"))
+LOGIN_REDIRECT_URL = os.environ.get("REDASH_LOGIN_REDIRECT_URL", "")
 
 settings = {
     "beacon_consent": None,
@@ -71,4 +72,5 @@ settings = {
     "send_email_on_failed_scheduled_queries": SEND_EMAIL_ON_FAILED_SCHEDULED_QUERIES,
     "hide_plotly_mode_bar": HIDE_PLOTLY_MODE_BAR,
     "disable_public_urls": DISABLE_PUBLIC_URLS,
+    "login_redirect_url": LOGIN_REDIRECT_URL,
 }
